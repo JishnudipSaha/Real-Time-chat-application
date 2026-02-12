@@ -45,7 +45,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, 
     try:
         while True:
             data = await websocket.receive_text()
-            # Fix: Added a default or searched user_id so the DB doesn't crash
+            # Added a default or searched user_id so the DB doesn't crash
             new_msg = models.Message(content=data, room_id=room_id)
             db.add(new_msg)
             db.commit()
