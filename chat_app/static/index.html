@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Real-Time Chat</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .chat-container { width: 100%; max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #messages { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa; }
+        .msg { margin-bottom: 8px; padding: 8px; border-radius: 5px; background: #e9e9e9; }
+        .msg b { color: #2c3e50; }
+        input { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #219150; }
+        
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h2>Real-Time Chat</h2>
+    
+    <input type="text" id="username" placeholder="Your Name" value="User1">
+    <input type="text" id="room" placeholder="Group ID (e.g., Python_Devs)" value="room1">
+    <button onclick="connect()">Connect to Chat</button>
+    
+    <hr>
+
+    <div id="messages"></div>
+    
+    <input type="text" id="messageText" placeholder="Type a message..." disabled>
+    <button id="sendBtn" onclick="sendMessage()" disabled>Send Message</button>
+</div>
+
+<script>
+    let ws = null;
+
+    function connect() {
+        const username = document.getElementById("username").value;
+        const room = document.getElementById("room").value;
+        
+        // This ensures it uses the correct host and port automatically
+        const ws_url = `ws://${window.location.host}/ws/${room}/${username}`;
+        ws = new WebSocket(ws_url);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const messages = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = 'msg';
+            const userBold = document.createElement('b');
+            userBold.textContent = `${data.user}: `; // .textContent is safe from hackers
+            const msgText = document.createTextNode(data.msg);
+
+            message.appendChild(userBold);
+            message.appendChild(msgText);
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight; // Auto-scroll
+        };
+
+        ws.onopen = function() {
+            document.getElementById("messageText").disabled = false;
+            document.getElementById("sendBtn").disabled = false;
+            alert("Connected to group: " + room);
+        };
+
+        ws.onclose = function() {
+            alert("Disconnected from server.");
+        };
+    }
+
+    function sendMessage() {
+        const input = document.getElementById("messageText");
+        if (input.value.trim() !== "") {
+            ws.send(input.value);
+            input.value = '';
+        }
+    }
+</script>
+
+</body>
+</html>
