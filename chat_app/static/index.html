@@ -40,8 +40,9 @@
         const username = document.getElementById("username").value;
         const room = document.getElementById("room").value;
         
-        // This ensures it uses the correct host and port automatically
-        const ws_url = `ws://${window.location.host}/ws/${room}/${username}`;
+        // Replace localhost:8000 with this logic
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws_url = `${protocol}//${window.location.host}/ws/${room}/${username}`;
         ws = new WebSocket(ws_url);
 
         ws.onmessage = function(event) {
